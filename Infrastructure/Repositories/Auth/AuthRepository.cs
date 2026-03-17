@@ -28,6 +28,28 @@ namespace Infrastructure.Repositories.Auth
             await _context.SaveChangesAsync();
         }
 
+        public async Task SaveRefreshTokenAsync(RefreshToken refreshToken)
+        {
+            await _context.RefreshTokens.AddAsync(refreshToken);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<RefreshToken?> GetRefreshTokenAsync(string tokenValue)
+        {
+            return await _context.RefreshTokens
+                .Include(r => r.User)
+                    .ThenInclude(u => u.UserRoles!)
+                        .ThenInclude(ur => ur.Role)
+                .Include(r => r.App)
+                .FirstOrDefaultAsync(r => r.TokenValue == tokenValue);
+        }
+
+        public async Task UpdateRefreshTokenAsync(RefreshToken refreshToken)
+        {
+            _context.RefreshTokens.Update(refreshToken);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task UpdateUserLastLoginAsync(Domain.Entities.User user)
         {
             user.LastLoginAt = DateTime.UtcNow;

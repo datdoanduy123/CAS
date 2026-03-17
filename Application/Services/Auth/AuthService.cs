@@ -66,6 +66,8 @@ namespace Application.Services.Auth
             // Cập nhật LastLoginAt
             await _authRepository.UpdateUserLastLoginAsync(user);
 
+            var now = DateTime.UtcNow;
+
             // 4. Create Sessions
             var userSession = new UserSession
             {
@@ -73,10 +75,10 @@ namespace Application.Services.Auth
                 UserId = user.Id,
                 IpAddress = ipAddress,
                 UserAgent = userAgent,
-                StartedAt = DateTime.UtcNow,
-                LastAccessedAt = DateTime.UtcNow,
+                StartedAt = now,
+                LastAccessedAt = now,
                 IsActive = true,
-                ExpiresAt = DateTime.UtcNow.AddDays(1) // Token expiration
+                ExpiresAt = now.AddDays(1) // Token expiration
             };
 
             var appSession = new AppSession
@@ -84,11 +86,32 @@ namespace Application.Services.Auth
                 Id = Guid.NewGuid(),
                 UserSessionId = userSession.Id,
                 AppId = app.Id,
-                StartedAt = DateTime.UtcNow,
-                LastAccessedAt = DateTime.UtcNow
+                StartedAt = now,
+                LastAccessedAt = now
             };
 
             await _authRepository.SaveSessionsAsync(userSession, appSession);
+
+            // 4.5 Generate Refresh Token
+            var randomNumber = new byte[32];
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+            }
+            string refreshTokenString = Convert.ToBase64String(randomNumber);
+
+            var refreshToken = new Domain.Entities.RefreshToken
+            {
+                Id = Guid.NewGuid(),
+                TokenValue = refreshTokenString,
+                UserId = user.Id,
+                AppId = app.Id,
+                ExpiresAt = now.AddDays(7), // Refresh Token valid for 7 days
+                CreatedByIp = ipAddress,
+                IsRevoked = false
+            };
+
+            await _authRepository.SaveRefreshTokenAsync(refreshToken);
 
             // 5. Generate Tokens
             var jwtSettings = _configuration.GetSection("Jwt");
@@ -125,7 +148,9 @@ namespace Application.Services.Auth
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(expireMinutes),
+                Expires = now.AddMinutes(expireMinutes),
+                NotBefore = now,
+                IssuedAt = now,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
@@ -139,10 +164,117 @@ namespace Application.Services.Auth
                 Data = new LoginResponseDTO
                 {
                     AccessToken = accessToken,
-                    RefreshToken = "dummy-refresh-token", // Thay thế bằng Refresh Token thật sau
-                    ExpiresAt = DateTime.UtcNow.AddMinutes(expireMinutes),
+                    RefreshToken = refreshTokenString, 
+                    ExpiresAt = now.AddMinutes(expireMinutes),
+                    RefreshTokenExpiresAt = refreshToken.ExpiresAt,
                     UserSessionId = userSession.Id,
                     AppSessionId = appSession.Id
+                }
+            };
+        }
+
+        public async Task<BaseResponseDTO<LoginResponseDTO>> RefreshTokenAsync(RefreshTokenRequestDTO request, string appCode, string? ipAddress, string? userAgent)
+        {
+            // 1. Fetch Refresh Token
+            var refreshToken = await _authRepository.GetRefreshTokenAsync(request.RefreshToken);
+            if (refreshToken == null || refreshToken.App?.Code != appCode)
+            {
+                return new BaseResponseDTO<LoginResponseDTO> { Success = false, Message = "Refresh Token không hợp lệ hoặc không thuộc ứng dụng này." };
+            }
+
+            if (!refreshToken.IsActive || refreshToken.User == null || !refreshToken.User.IsActive || refreshToken.App == null || !refreshToken.App.IsActive)
+            {
+                return new BaseResponseDTO<LoginResponseDTO> { Success = false, Message = "Refresh Token đã hết hạn / bị thu hồi hoặc tài khoản không hoạt động." };
+            }
+
+            // 2. Revoke old token
+            refreshToken.IsRevoked = true;
+            await _authRepository.UpdateRefreshTokenAsync(refreshToken);
+
+            // 3. Generate New Refresh Token
+            var now = DateTime.UtcNow;
+            
+            var randomNumber = new byte[32];
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+            }
+            string newRefreshTokenString = Convert.ToBase64String(randomNumber);
+
+            var newRefreshToken = new Domain.Entities.RefreshToken
+            {
+                Id = Guid.NewGuid(),
+                TokenValue = newRefreshTokenString,
+                UserId = refreshToken.UserId,
+                AppId = refreshToken.AppId,
+                ExpiresAt = now.AddDays(7),
+                CreatedByIp = ipAddress,
+                ReplacedByToken = newRefreshTokenString,
+                IsRevoked = false
+            };
+
+            await _authRepository.SaveRefreshTokenAsync(newRefreshToken);
+
+            // 4. Generate New Access Token
+            var user = refreshToken.User;
+            var app = refreshToken.App;
+
+            var jwtSettings = _configuration.GetSection("Jwt");
+            var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("Jwt:SecretKey is missing");
+            var expireMinutes = Convert.ToInt32(jwtSettings["TokenExpirationMinutes"] ?? "60");
+            
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(secretKey);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim("username", user.Username),
+                new Claim("AppCode", app.Code),
+                // Session IDs will be empty since RefreshToken entity doesn't trace them natively without deeper DB schemas.
+                new Claim("UserSessionId", Guid.Empty.ToString()),
+                new Claim("AppSessionId", Guid.Empty.ToString())
+            };
+
+            if (user.UserRoles != null)
+            {
+                foreach (var ur in user.UserRoles)
+                {
+                    if (ur.Role != null && !string.IsNullOrEmpty(ur.Role.Name))
+                    {
+                        if (ur.Role.AppId == null || ur.Role.AppId == app.Id)
+                        {
+                            claims.Add(new Claim("role", ur.Role.Name));
+                        }
+                    }
+                }
+            }
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = now.AddMinutes(expireMinutes),
+                NotBefore = now,
+                IssuedAt = now,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var accessToken = tokenHandler.WriteToken(token);
+
+            // 5. Return updated DTO
+            return new BaseResponseDTO<LoginResponseDTO>
+            {
+                Success = true,
+                Message = "Refresh Token thành công",
+                Data = new LoginResponseDTO
+                {
+                    AccessToken = accessToken,
+                    RefreshToken = newRefreshTokenString, 
+                    ExpiresAt = now.AddMinutes(expireMinutes),
+                    RefreshTokenExpiresAt = newRefreshToken.ExpiresAt,
+                    UserSessionId = Guid.Empty,
+                    AppSessionId = Guid.Empty
                 }
             };
         }
