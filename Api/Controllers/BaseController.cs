@@ -1,11 +1,45 @@
-﻿using Microsoft.AspNetCore.Http;
+using Application.DTOs.Common;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using static Domain.Constants.MessageConstant;
 
 namespace Api.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
     public class BaseController : ControllerBase
     {
+        public Guid UserId { get; set; }
+        public List<string> Roles { get; set; } = new List<string>();
+        public bool IsAdmin { get; set; }
+
+        protected async Task<BaseResponseDTO<T>> HandleException<T>(Task<T> task)
+        {
+            try
+            {
+                var data = await task;
+                return BaseResponseDTO<T>.SuccessResponse(data);
+            }
+            catch (ApplicationException ex)
+            {
+                // Lỗi nghiệp vụ từ Application layer
+                return BaseResponseDTO<T>.FailResponse(ex.Message, 200);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // Lỗi xác thực
+                return BaseResponseDTO<T>.FailResponse(ex.Message, 401);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // Lỗi không tìm thấy dữ liệu
+                return BaseResponseDTO<T>.FailResponse(ex.Message, 404);
+            }
+            catch (Exception ex)
+            {
+                // Lỗi hệ thống chưa xác định
+                return BaseResponseDTO<T>.FailResponse(CommonMessage.INTERNAL_SERVER_ERROR, 500);
+            }
+        }
     }
 }
