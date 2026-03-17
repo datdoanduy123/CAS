@@ -19,6 +19,8 @@ builder.Services.AddSwaggerGen();
 // Dependency Injection
 builder.Services.AddScoped<Application.IRepositories.User.IUserRepository, Infrastructure.Repositories.User.UserRepository>();
 builder.Services.AddScoped<Application.IServices.User.IUserService, Application.Services.User.UserService>();
+builder.Services.AddScoped<Application.IRepositories.Role.IRoleRepository, Infrastructure.Repositories.Role.RoleRepository>();
+builder.Services.AddScoped<Application.IServices.Role.IRoleService, Application.Services.Role.RoleService>();
 
 var app = builder.Build();
 

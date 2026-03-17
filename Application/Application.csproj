@@ -11,10 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DTOs\Role\" />
     <Folder Include="IRepositories\" />
-    <Folder Include="IServices\" />
-    <Folder Include="DTOs\" />
-    <Folder Include="Services\" />
+    <Folder Include="IServices\Role\" />
+    <Folder Include="Services\Role\" />
   </ItemGroup>
 
 </Project>

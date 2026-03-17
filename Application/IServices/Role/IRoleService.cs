@@ -1,0 +1,14 @@
+using Application.DTOs.Common;
+using Application.DTOs.Role;
+
+namespace Application.IServices.Role
+{
+    public interface IRoleService
+    {
+        Task<List<RoleListItemDTO>> GetAllAsync(QueryDTO<RoleQueryDTO> model);
+        Task<RoleDTO> GetByIdAsync(Guid id);
+        Task<RoleDTO> CreateAsync(BaseRequestDTO<RoleUpsertDTO> model);
+        Task<RoleDTO> UpdateAsync(Guid id, BaseRequestDTO<RoleUpsertDTO> model);
+        Task<bool> DeleteAsync(Guid id, BaseRequestDTO model);
+    }
+}

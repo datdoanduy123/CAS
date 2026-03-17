@@ -10,10 +10,10 @@ namespace Domain.Entities
     public class Role : BaseEntity
     {
         public string Name { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
         public string? Description { get; set; }
 
         public Guid? RealmId { get; set; }
-        public Realm? Realm { get; set; }
 
         /// <summary>
         /// Nếu AppId = null, đây là Realm Role (VD: SuperAdmin).
@@ -21,6 +21,7 @@ namespace Domain.Entities
         /// </summary>
         public Guid? AppId { get; set; }
         public App? App { get; set; }
+        public Realm? Realm { get; set; }
 
         // Navigation Properties
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
