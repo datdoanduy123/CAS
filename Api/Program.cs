@@ -42,10 +42,10 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAppRepository, AppRepository>();
 builder.Services.AddScoped<IAppService, AppService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+// Role Assignment Repository (gán/gỡ quyền cho User)
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 
 // JWT Configurations
 var jwtSettings = builder.Configuration.GetSection("Jwt");

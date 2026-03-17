@@ -2,7 +2,9 @@ namespace Application.DTOs.Role
 {
     public class RoleQueryDTO
     {
-        public bool? IsActive { get; set; }
-        public bool IncludeInactive { get; set; } = false;
+        /// <summary>
+        /// Lọc theo App: Nếu null => Hiện Realm Roles. Nếu có giá trị => Hiện Role của App đó.
+        /// </summary>
+        public Guid? AppId { get; set; }
     }
 }

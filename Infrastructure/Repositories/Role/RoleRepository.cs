@@ -23,17 +23,7 @@ namespace Infrastructure.Repositories.Role
                 .AsNoTracking()
                 .OrderBy(x => x.Name)
                 .AsQueryable();
-
-            // Default: only return active records unless caller explicitly asks otherwise.
-            if (model.Query?.IsActive.HasValue == true)
-            {
-                query = query.Where(x => x.IsActive == model.Query.IsActive.Value);
-            }
-            else if (model.Query?.IncludeInactive != true)
-            {
-                query = query.Where(x => x.IsActive);
-            }
-
+     
             if (!string.IsNullOrWhiteSpace(model.Keyword))
             {
                 var keyword = model.Keyword.Trim().ToLower();

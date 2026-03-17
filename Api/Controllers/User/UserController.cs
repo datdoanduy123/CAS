@@ -1,4 +1,5 @@
 using Application.DTOs.Common;
+using Application.DTOs.Role;
 using Application.DTOs.User;
 using Microsoft.AspNetCore.Mvc;
 
@@ -66,6 +67,58 @@ namespace Api.Controllers.User
             var metaData = new MetaDataDTO { Page = query.Page, PageSize = query.PageSize, Total = query.Total };
 
             return await HandleException(dataTask, metaData);
+        }
+
+        // ================================================
+        // ROLE ASSIGNMENT - Phân quyền User
+        // Giống mô hình Keycloak: Realm Role + App Role
+        // ================================================
+
+        /// <summary>
+        /// Lấy tất cả quyền (Role) hiện tại của User.
+        /// Trả về cả Realm Role (dùng toàn hệ thống) và App Role (riêng từng App).
+        /// </summary>
+        [HttpGet("{userId}/roles")]
+        public async Task<BaseResponseDTO<List<UserRoleDTO>>> GetUserRoles([FromRoute] Guid userId)
+        {
+            return await HandleException(_userService.GetUserRolesAsync(userId));
+        }
+
+        /// <summary>
+        /// Gán thêm danh sách Role cho User (không xóa Role cũ).
+        /// Body: { "roleIds": ["guid-1", "guid-2"] }
+        /// </summary>
+        [HttpPost("{userId}/roles")]
+        public async Task<BaseResponseDTO<bool>> AssignRoles(
+            [FromRoute] Guid userId,
+            [FromBody] AssignRolesDTO request)
+        {
+            return await HandleException(_userService.AssignRolesToUserAsync(userId, request));
+        }
+
+        /// <summary>
+        /// Đồng bộ toàn bộ Role của User.
+        /// Xóa hết quyền cũ, gán lại theo danh sách mới.
+        /// Thường dùng cho giao diện checkbox: Admin submit cả trang.
+        /// </summary>
+        [HttpPut("{userId}/roles")]
+        public async Task<BaseResponseDTO<bool>> SyncRoles(
+            [FromRoute] Guid userId,
+            [FromBody] SyncRolesDTO request)
+        {
+            return await HandleException(_userService.SyncUserRolesAsync(userId, request));
+        }
+
+        /// <summary>
+        /// Gỡ bỏ danh sách Role cụ thể khỏi User.
+        /// Body: { "roleIds": ["guid-1"] }
+        /// </summary>
+        [HttpDelete("{userId}/roles")]
+        public async Task<BaseResponseDTO<bool>> RemoveRoles(
+            [FromRoute] Guid userId,
+            [FromBody] AssignRolesDTO request)
+        {
+            return await HandleException(_userService.RemoveRolesFromUserAsync(userId, request));
         }
     }
 }
