@@ -8,6 +8,6 @@ namespace Application.DTOs.User
         public string Password { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? FullName { get; set; }
-        public Guid RealmId { get; set; }
+        public Guid? RealmId { get; set; }
     }
 }
