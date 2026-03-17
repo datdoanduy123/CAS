@@ -1,3 +1,15 @@
+using Application.IRepositories.App;
+using Application.IRepositories.Role;
+using Application.IRepositories.User;
+using Application.IServices.App;
+using Application.IServices.Role;
+using Application.IServices.User;
+using Application.Services.App;
+using Application.Services.Role;
+using Application.Services.User;
+using Infrastructure.Repositories.App;
+using Infrastructure.Repositories.Role;
+using Infrastructure.Repositories.User;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,12 +29,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Dependency Injection
-builder.Services.AddScoped<Application.IRepositories.User.IUserRepository, Infrastructure.Repositories.User.UserRepository>();
-builder.Services.AddScoped<Application.IServices.User.IUserService, Application.Services.User.UserService>();
-builder.Services.AddScoped<Application.IRepositories.Role.IRoleRepository, Infrastructure.Repositories.Role.RoleRepository>();
-builder.Services.AddScoped<Application.IServices.Role.IRoleService, Application.Services.Role.RoleService>();
-builder.Services.AddScoped<Application.IRepositories.App.IAppRepository, Infrastructure.Repositories.App.AppRepository>();
-builder.Services.AddScoped<Application.IServices.App.IAppService, Application.Services.App.AppService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IAppRepository, AppRepository>();
+builder.Services.AddScoped<IAppService, AppService>();
 
 var app = builder.Build();
 
