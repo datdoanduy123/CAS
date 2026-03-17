@@ -56,5 +56,11 @@ namespace Infrastructure.Repositories.Auth
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
         }
+
+        public async Task UpdateUserPasswordAsync(Domain.Entities.User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
     }
 }

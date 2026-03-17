@@ -1,7 +1,10 @@
 using Application.DTOs.Auth;
 using Application.DTOs.Common;
 using Application.IServices.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Api.Controllers.Auth
@@ -62,6 +65,23 @@ namespace Api.Controllers.Auth
 
             // 3. Gọi Service
             return await _authService.RefreshTokenAsync(request, appCode, ipAddress, userAgent);
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<BaseResponseDTO<string>> ChangePassword([FromBody] ChangePasswordRequestDTO request)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+            {
+                return new BaseResponseDTO<string>
+                {
+                    Success = false,
+                    Message = "Không thể xác định danh tính người dùng."
+                };
+            }
+
+            return await _authService.ChangePasswordAsync(userId, request);
         }
     }
 }

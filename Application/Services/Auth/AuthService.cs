@@ -278,5 +278,47 @@ namespace Application.Services.Auth
                 }
             };
         }
+
+        public async Task<BaseResponseDTO<string>> ChangePasswordAsync(Guid userId, ChangePasswordRequestDTO request)
+        {
+            // 1. Fetch User
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null || !user.IsActive)
+            {
+                return new BaseResponseDTO<string>
+                {
+                    Success = false,
+                    Message = "Tài khoản không tồn tại hoặc đã bị khóa."
+                };
+            }
+
+            // 2. Verify Old Password
+            bool isOldPasswordValid = BCrypt.Net.BCrypt.Verify(request.OldPassword, user.PasswordHash);
+            if (!isOldPasswordValid)
+            {
+                return new BaseResponseDTO<string>
+                {
+                    Success = false,
+                    Message = "Mật khẩu hiện tại không chính xác."
+                };
+            }
+
+            // 3. Hash New Password
+            string salt = BCrypt.Net.BCrypt.GenerateSalt();
+            string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword, salt);
+
+            user.PasswordHash = newPasswordHash;
+            user.PasswordSalt = salt;
+
+            // 4. Update Database
+            await _authRepository.UpdateUserPasswordAsync(user);
+
+            return new BaseResponseDTO<string>
+            {
+                Success = true,
+                Message = "Đổi mật khẩu thành công.",
+                Data = "OK"
+            };
+        }
     }
 }

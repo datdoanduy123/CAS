@@ -11,5 +11,6 @@ namespace Application.IRepositories.Auth
         Task<RefreshToken?> GetRefreshTokenAsync(string tokenValue);
         Task UpdateRefreshTokenAsync(RefreshToken refreshToken);
         Task UpdateUserLastLoginAsync(Domain.Entities.User user);
+        Task UpdateUserPasswordAsync(Domain.Entities.User user);
     }
 }
