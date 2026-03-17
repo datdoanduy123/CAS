@@ -14,7 +14,7 @@ namespace Domain.Entities
 
         // Navigation Properties
         public ICollection<User> Users { get; set; } = new List<User>();
-        public ICollection<Client> Clients { get; set; } = new List<Client>();
+        public ICollection<App> Apps { get; set; } = new List<App>();
         public ICollection<Role> Roles { get; set; } = new List<Role>();
     }
 }

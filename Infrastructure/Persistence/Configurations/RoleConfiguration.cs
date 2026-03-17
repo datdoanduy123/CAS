@@ -22,9 +22,9 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
             .HasForeignKey(e => e.RealmId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasOne(e => e.Client)
+        builder.HasOne(e => e.App)
             .WithMany(c => c.Roles)
-            .HasForeignKey(e => e.ClientId)
+            .HasForeignKey(e => e.AppId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

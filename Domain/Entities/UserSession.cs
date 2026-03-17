@@ -5,7 +5,7 @@ namespace Domain.Entities
 {
     /// <summary>
     /// UserSession: Phiên đăng nhập TỔNG của 1 User trên hệ thống CAS.
-    /// Nếu Session này bị hủy, toàn bộ ClientSession bên dưới cũng bay màu (Logout).
+    /// Nếu Session này bị hủy, toàn bộ AppSession bên dưới cũng bay màu (Logout).
     /// </summary>
     public class UserSession : BaseEntity
     {
@@ -22,6 +22,6 @@ namespace Domain.Entities
         public bool IsActive { get; set; } = true;
 
         // Navigation Properties
-        public ICollection<ClientSession> ClientSessions { get; set; } = new List<ClientSession>();
+        public ICollection<AppSession> AppSessions { get; set; } = new List<AppSession>();
     }
 }

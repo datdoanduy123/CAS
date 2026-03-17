@@ -4,9 +4,9 @@ using System.Collections.Generic;
 namespace Domain.Entities
 {
     /// <summary>
-    /// Client: Đại diện cho các ứng dụng vệ tinh kết nối đến dự án SSO (CAS)
+    /// App: Đại diện cho các ứng dụng vệ tinh kết nối đến dự án SSO (CAS)
     /// </summary>
-    public class Client : BaseEntity
+    public class App : BaseEntity
     {
         public string Name { get; set; } = string.Empty;
         
@@ -15,7 +15,7 @@ namespace Domain.Entities
         /// <summary>
         /// Mật khẩu của ứng dụng (dùng cho luồng bảo mật cao)
         /// </summary>
-        public string? ClientSecret { get; set; }
+        public string? AppSecret { get; set; }
         
         /// <summary>
         /// Danh sách URL được phép Redirect về sau khi Login thành công. 
@@ -24,7 +24,7 @@ namespace Domain.Entities
         public string RedirectUris { get; set; } = string.Empty;
 
         /// <summary>
-        /// Ví dụ: "authorization_code", "client_credentials", "refresh_token"
+        /// Ví dụ: "authorization_code", "App_credentials", "refresh_token"
         /// </summary>
         public string AllowedGrantTypes { get; set; } = string.Empty;
         
@@ -36,17 +36,17 @@ namespace Domain.Entities
         /// <summary>
         /// Phân loại: Public (spa/mobile) hay Confidential (web server giữ secret)
         /// </summary>
-        public string ClientType { get; set; } = "Confidential";
+        public string AppType { get; set; } = "Confidential";
 
         public bool IsActive { get; set; } = true;
 
-        // Cho phép Client thuộc về 1 Realm cụ thể (tuỳ chọn)
+        // Cho phép App thuộc về 1 Realm cụ thể (tuỳ chọn)
         public Guid? RealmId { get; set; }
         public Realm? Realm { get; set; }
 
         // Navigation Properties
         public ICollection<Role> Roles { get; set; } = new List<Role>();
-        public ICollection<ClientSession> ClientSessions { get; set; } = new List<ClientSession>();
+        public ICollection<AppSession> AppSessions { get; set; } = new List<AppSession>();
         public ICollection<AuthorizationCode> AuthorizationCodes { get; set; } = new List<AuthorizationCode>();
     }
 }

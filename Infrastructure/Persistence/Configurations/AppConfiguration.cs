@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Persistence.Configurations;
 
-public class ClientConfiguration : IEntityTypeConfiguration<Client>
+public class AppConfiguration : IEntityTypeConfiguration<App>
 {
-    public void Configure(EntityTypeBuilder<Client> builder)
+    public void Configure(EntityTypeBuilder<App> builder)
     {
         builder.HasKey(e => e.Id);
 
@@ -18,7 +18,7 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
             .IsRequired()
             .HasMaxLength(150);
 
-        builder.Property(e => e.ClientSecret)
+        builder.Property(e => e.AppSecret)
             .HasMaxLength(255);
 
         builder.Property(e => e.RedirectUris)
@@ -32,12 +32,12 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
             .IsRequired()
             .HasMaxLength(255);
 
-        builder.Property(e => e.ClientType)
+        builder.Property(e => e.AppType)
             .IsRequired()
             .HasMaxLength(50);
 
         builder.HasOne(e => e.Realm)
-            .WithMany(r => r.Clients)
+            .WithMany(r => r.Apps)
             .HasForeignKey(e => e.RealmId)
             .OnDelete(DeleteBehavior.Restrict);
     }

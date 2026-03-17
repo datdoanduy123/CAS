@@ -5,7 +5,7 @@ namespace Domain.Entities
 {
     /// <summary>
     /// Role: Định nghĩa Quyền (Roles).
-    /// Hỗ trợ cả Realm Role (Toàn bộ Server) và Client Role (Quyền riêng của 1 App)
+    /// Hỗ trợ cả Realm Role (Toàn bộ Server) và App Role (Quyền riêng của 1 App)
     /// </summary>
     public class Role : BaseEntity
     {
@@ -16,11 +16,11 @@ namespace Domain.Entities
         public Realm? Realm { get; set; }
 
         /// <summary>
-        /// Nếu ClientId = null, đây là Realm Role (VD: SuperAdmin).
-        /// Nếu ClientId có giá trị, đây là Client Role (VD: Editor của App A).
+        /// Nếu AppId = null, đây là Realm Role (VD: SuperAdmin).
+        /// Nếu AppId có giá trị, đây là App Role (VD: Editor của App A).
         /// </summary>
-        public Guid? ClientId { get; set; }
-        public Client? Client { get; set; }
+        public Guid? AppId { get; set; }
+        public App? App { get; set; }
 
         // Navigation Properties
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();

@@ -19,12 +19,12 @@ public class AppDbContext : DbContext
     
     // SSO Entities
     public DbSet<Realm> Realms { get; set; } = null!;
-    public DbSet<Client> Clients { get; set; } = null!;
+    public DbSet<App> Apps { get; set; } = null!;
     public DbSet<Role> Roles { get; set; } = null!;
     public DbSet<UserRole> UserRoles { get; set; } = null!;
     
     public DbSet<UserSession> UserSessions { get; set; } = null!;
-    public DbSet<ClientSession> ClientSessions { get; set; } = null!;
+    public DbSet<AppSession> AppSessions { get; set; } = null!;
     
     public DbSet<AuthorizationCode> AuthorizationCodes { get; set; } = null!;
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;

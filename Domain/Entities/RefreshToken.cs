@@ -13,8 +13,8 @@ namespace Domain.Entities
         public Guid UserId { get; set; }
         public User? User { get; set; }
 
-        public Guid ClientId { get; set; }
-        public Client? Client { get; set; }
+        public Guid AppId { get; set; }
+        public App? App { get; set; }
 
         public DateTime ExpiresAt { get; set; }
         public bool IsRevoked { get; set; } = false;

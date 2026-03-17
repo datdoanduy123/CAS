@@ -21,9 +21,9 @@ public class AuthorizationCodeConfiguration : IEntityTypeConfiguration<Authoriza
         // Đánh index cho Code để tìm nhanh lúc đổi Token
         builder.HasIndex(e => e.Code).IsUnique();
 
-        builder.HasOne(e => e.Client)
+        builder.HasOne(e => e.App)
             .WithMany(c => c.AuthorizationCodes)
-            .HasForeignKey(e => e.ClientId)
+            .HasForeignKey(e => e.AppId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(e => e.User)

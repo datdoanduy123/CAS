@@ -4,20 +4,20 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Persistence.Configurations;
 
-public class ClientSessionConfiguration : IEntityTypeConfiguration<ClientSession>
+public class AppSessionConfiguration : IEntityTypeConfiguration<AppSession>
 {
-    public void Configure(EntityTypeBuilder<ClientSession> builder)
+    public void Configure(EntityTypeBuilder<AppSession> builder)
     {
         builder.HasKey(e => e.Id);
 
         builder.HasOne(e => e.UserSession)
-            .WithMany(us => us.ClientSessions)
+            .WithMany(us => us.AppSessions)
             .HasForeignKey(e => e.UserSessionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(e => e.Client)
-            .WithMany(c => c.ClientSessions)
-            .HasForeignKey(e => e.ClientId)
+        builder.HasOne(e => e.App)
+            .WithMany(c => c.AppSessions)
+            .HasForeignKey(e => e.AppId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }
