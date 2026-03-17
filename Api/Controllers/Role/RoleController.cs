@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Common;
 using Application.DTOs.Role;
+using Application.IServices.Role;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers.Role
@@ -8,9 +9,9 @@ namespace Api.Controllers.Role
     [ApiController]
     public class RoleController : BaseController
     {
-        private readonly Application.IServices.Role.IRoleService _roleService;
+        private readonly IRoleService _roleService;
 
-        public RoleController(Application.IServices.Role.IRoleService roleService)
+        public RoleController(IRoleService roleService)
         {
             _roleService = roleService;
         }
@@ -72,6 +73,19 @@ namespace Api.Controllers.Role
             };
 
             return await HandleException(_roleService.UpdateAsync(id, model));
+        }
+
+        [HttpPatch("{id:guid}/active")]
+        public async Task<BaseResponseDTO<RoleDTO>> SetActive(Guid id, [FromBody] RoleActiveDTO request)
+        {
+            var model = new BaseRequestDTO<RoleActiveDTO>
+            {
+                Request = request,
+                ActionBy = UserId,
+                IsAdmin = IsAdmin
+            };
+
+            return await HandleException(_roleService.SetActiveAsync(id, model));
         }
 
         [HttpDelete("{id:guid}")]

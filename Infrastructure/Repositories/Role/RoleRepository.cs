@@ -24,6 +24,16 @@ namespace Infrastructure.Repositories.Role
                 .OrderBy(x => x.Name)
                 .AsQueryable();
 
+            // Default: only return active records unless caller explicitly asks otherwise.
+            if (model.Query?.IsActive.HasValue == true)
+            {
+                query = query.Where(x => x.IsActive == model.Query.IsActive.Value);
+            }
+            else if (model.Query?.IncludeInactive != true)
+            {
+                query = query.Where(x => x.IsActive);
+            }
+
             if (!string.IsNullOrWhiteSpace(model.Keyword))
             {
                 var keyword = model.Keyword.Trim().ToLower();
@@ -67,7 +77,8 @@ namespace Infrastructure.Repositories.Role
             {
                 Name = model.Request.Name.Trim(),
                 Code = model.Request.Code.Trim(),
-                Description = string.IsNullOrWhiteSpace(model.Request.Description) ? null : model.Request.Description.Trim()
+                Description = string.IsNullOrWhiteSpace(model.Request.Description) ? null : model.Request.Description.Trim(),
+                IsActive = true
             };
 
             await _context.Roles.AddAsync(role);
@@ -111,6 +122,25 @@ namespace Infrastructure.Repositories.Role
             return true;
         }
 
+        public async Task<RoleDTO> SetActiveAsync(Guid id, BaseRequestDTO<RoleActiveDTO> model)
+        {
+            if (model?.Request == null)
+            {
+                throw new ApplicationException(MessageConstant.CommonMessage.MISSING_PARAM);
+            }
+
+            var role = await _context.Roles.FirstOrDefaultAsync(x => x.Id == id);
+            if (role == null)
+            {
+                throw new KeyNotFoundException(MessageConstant.CommonMessage.NOT_FOUND);
+            }
+
+            role.IsActive = model.Request.IsActive;
+            await _context.SaveChangesAsync();
+
+            return await GetByIdAsync(role.Id);
+        }
+
         private static void ValidateRequest(RoleUpsertDTO request)
         {
             if (request == null)
@@ -146,7 +176,8 @@ namespace Infrastructure.Repositories.Role
                 Id = role.Id,
                 Name = role.Name,
                 Code = role.Code,
-                Description = role.Description
+                Description = role.Description,
+                IsActive = role.IsActive
             };
         }
 
@@ -157,7 +188,8 @@ namespace Infrastructure.Repositories.Role
                 Id = role.Id,
                 Name = role.Name,
                 Code = role.Code,
-                Description = role.Description
+                Description = role.Description,
+                IsActive = role.IsActive
             };
         }
     }

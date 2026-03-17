@@ -34,6 +34,11 @@ namespace Application.Services.Role
             return await _roleRepository.UpdateAsync(id, model);
         }
 
+        public async Task<RoleDTO> SetActiveAsync(Guid id, BaseRequestDTO<RoleActiveDTO> model)
+        {
+            return await _roleRepository.SetActiveAsync(id, model);
+        }
+
         public async Task<bool> DeleteAsync(Guid id, BaseRequestDTO model)
         {
             return await _roleRepository.DeleteAsync(id, model);
