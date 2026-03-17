@@ -62,7 +62,10 @@ namespace Infrastructure.Repositories.User
 
         public async Task<Domain.Entities.User?> GetByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            return await _context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task<Domain.Entities.User?> GetByEmailAsync(string email)
