@@ -68,6 +68,8 @@ namespace Infrastructure.Repositories.Role
                 Name = model.Request.Name.Trim(),
                 Code = model.Request.Code.Trim(),
                 Description = string.IsNullOrWhiteSpace(model.Request.Description) ? null : model.Request.Description.Trim(),
+                RealmId = model.Request.RealmId,
+                AppId = model.Request.AppId,
                 IsActive = true
             };
 
@@ -92,6 +94,8 @@ namespace Infrastructure.Repositories.Role
             role.Name = model.Request.Name.Trim();
             role.Code = model.Request.Code.Trim();
             role.Description = string.IsNullOrWhiteSpace(model.Request.Description) ? null : model.Request.Description.Trim();
+            role.RealmId = model.Request.RealmId;
+            role.AppId = model.Request.AppId;
 
             await _context.SaveChangesAsync();
 
@@ -167,6 +171,8 @@ namespace Infrastructure.Repositories.Role
                 Name = role.Name,
                 Code = role.Code,
                 Description = role.Description,
+                RealmId = role.RealmId,
+                AppId = role.AppId,
                 IsActive = role.IsActive
             };
         }
@@ -179,6 +185,8 @@ namespace Infrastructure.Repositories.Role
                 Name = role.Name,
                 Code = role.Code,
                 Description = role.Description,
+                RealmId = role.RealmId,
+                AppId = role.AppId,
                 IsActive = role.IsActive
             };
         }
