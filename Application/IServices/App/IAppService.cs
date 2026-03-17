@@ -9,9 +9,9 @@ namespace Application.IServices.App
     {
         Task<List<AppListItemDTO>> GetAllAsync(QueryDTO<AppQueryDTO> model);
         Task<AppListItemDTO?> GetByIdAsync(Guid id);
-        Task<bool> CreateAsync(CreateAppDTO request);
+        Task<string> CreateAsync(CreateAppDTO request);
         Task<bool> UpdateAsync(Guid id, UpdateAppDTO request);
         Task<bool> DeleteAsync(Guid id);
-        Task<bool> SoftDeleteAsync(Guid id);
+        Task<bool> ChangeStatusAsync(Guid id, bool isActive);
     }
 }

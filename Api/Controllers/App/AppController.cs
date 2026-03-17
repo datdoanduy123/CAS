@@ -29,10 +29,10 @@ namespace Api.Controllers.App
             return await HandleException(_appService.DeleteAsync(id));
         }
 
-        [HttpDelete("soft-delete/{id}")]
-        public async Task<BaseResponseDTO<bool>> SoftDelete([FromRoute] Guid id)
+        [HttpPut("{id}/status")]
+        public async Task<BaseResponseDTO<bool>> ChangeStatus([FromRoute] Guid id, [FromQuery] bool isActive)
         {
-            return await HandleException(_appService.SoftDeleteAsync(id));
+            return await HandleException(_appService.ChangeStatusAsync(id, isActive));
         }
 
         [HttpPut("{id}")]
@@ -42,7 +42,7 @@ namespace Api.Controllers.App
         }
 
         [HttpPost]
-        public async Task<BaseResponseDTO<bool>> Create([FromBody] CreateAppDTO request)
+        public async Task<BaseResponseDTO<string>> Create([FromBody] CreateAppDTO request)
         {
             return await HandleException(_appService.CreateAsync(request));
         }

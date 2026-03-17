@@ -14,6 +14,6 @@ namespace Application.IRepositories.User
         Task<Domain.Entities.User?> GetByIdAsync(Guid id);
         Task<bool> CapNhat(Domain.Entities.User user);
         Task<bool> XoaCung(Domain.Entities.User user);
-        Task<bool> TaoMoi(CreateUserDTO request);
+        Task<bool> TaoMoi(CreateUserDTO request, string hashedPassword, string salt);
     }
 }

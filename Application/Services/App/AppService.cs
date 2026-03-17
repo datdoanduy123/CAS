@@ -2,8 +2,10 @@ using Application.DTOs.App;
 using Application.DTOs.Common;
 using Application.IRepositories.App;
 using Application.IServices.App;
+using Application.Helpers;
 using Domain.Constants;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Application.Services.App
@@ -30,12 +32,12 @@ namespace Application.Services.App
             return await _appRepository.XoaCung(app);
         }
 
-        public async Task<bool> SoftDeleteAsync(Guid id)
+        public async Task<bool> ChangeStatusAsync(Guid id, bool isActive)
         {
             var app = await _appRepository.GetByIdAsync(id);
             if (app == null) throw new ApplicationException(Domain.Constants.MessageConstant.AppMessage.APP_NOT_FOUND);
 
-            app.IsActive = false;
+            app.IsActive = isActive;
             return await _appRepository.CapNhat(app);
         }
 
@@ -75,14 +77,24 @@ namespace Application.Services.App
             return await _appRepository.CapNhat(app);
         }
 
-        public async Task<bool> CreateAsync(CreateAppDTO request)
+        public async Task<string> CreateAsync(CreateAppDTO request)
         {
             // 1. Kiểm tra tồn tại qua AppCode
             var existingApp = await _appRepository.GetByCodeAsync(request.Code);
             if (existingApp != null) throw new ApplicationException(MessageConstant.AppMessage.APP_EXIST);
 
-            // 2. Repo xử lý tạo mới
-            return await _appRepository.TaoMoi(request);
+            // 2. Sinh AppSecret ngẫu nhiên an toàn
+            string plainSecret = SecurityHelper.GenerateRandomSecret();
+            
+            // 3. Hash AppSecret trước khi lưu
+            string hashedSecret = SecurityHelper.HashSecret(plainSecret);
+
+            // 4. Repo xử lý tạo mới
+            var success = await _appRepository.TaoMoi(request, hashedSecret);
+            
+            if (!success) throw new Exception("Không thể tạo App");
+
+            return plainSecret;
         }
     }
 }

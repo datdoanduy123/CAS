@@ -9,7 +9,7 @@ namespace Application.IRepositories.App
         Task<Domain.Entities.App?> GetByIdAsync(Guid id);
         Task<bool> CapNhat(Domain.Entities.App app);
         Task<bool> XoaCung(Domain.Entities.App app);
-        Task<bool> TaoMoi(CreateAppDTO request);
+        Task<bool> TaoMoi(CreateAppDTO request, string hashedSecret);
         Task<Domain.Entities.App?> GetByCodeAsync(string code);
     }
 }

@@ -85,14 +85,14 @@ namespace Infrastructure.Repositories.App
             return await _context.Apps.FirstOrDefaultAsync(x => x.Code == code);
         }
 
-        public async Task<bool> TaoMoi(CreateAppDTO dto)
+        public async Task<bool> TaoMoi(CreateAppDTO dto, string hashedSecret)
         {
             var entity = new Domain.Entities.App
             {
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
                 Code = dto.Code.Trim(),
-                AppSecret = dto.AppSecret,
+                AppSecret = hashedSecret,
                 RedirectUris = dto.RedirectUris,
                 AllowedGrantTypes = dto.AllowedGrantTypes,
                 LogoutUri = dto.LogoutUri,

@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.User
@@ -22,19 +21,14 @@ namespace Infrastructure.Repositories.User
 
         public async Task<List<UserListItemDTO>> Search(QueryDTO<UserQueryDTO> model)
         {
-            var query = EntityFrameworkQueryableExtensions.AsNoTracking(_context.Users)
-                .Where(x => x.IsActive) // Mặc định chỉ lấy những người đang hoạt động
-                .OrderByDescending(x => x.CreatedAt)
-                .AsQueryable();
+            var query = _context.Users.AsNoTracking().AsQueryable();
 
-            // 1. Lọc theo Keyword (Username hoặc FullName)
             if (!string.IsNullOrWhiteSpace(model.Keyword))
             {
                 var keyword = model.Keyword.Trim().ToLower();
                 query = query.Where(x => x.Username.ToLower().Contains(keyword) || (x.FullName != null && x.FullName.ToLower().Contains(keyword)));
             }
 
-            // 2. Lọc theo các điều kiện bổ sung trong UserQueryDTO
             if (model.Query != null)
             {
                 if (model.Query.IsActive.HasValue)
@@ -48,26 +42,22 @@ namespace Infrastructure.Repositories.User
                 }
             }
 
-            // 3. Tính tổng số bản ghi
-            model.Total = await EntityFrameworkQueryableExtensions.CountAsync(query);
+            model.Total = await query.CountAsync();
 
-            // 4. Phân trang
             if (!model.IsGetAll)
             {
-                query = query.Skip(model.Skip).Take(model.PageSize);
+                query = query.OrderByDescending(x => x.CreatedAt).Skip(model.Skip).Take(model.PageSize);
             }
 
-            // 5. Mapping trực tiếp sang DTO
-            return (await EntityFrameworkQueryableExtensions.ToListAsync(query))
-                .Select(x => new Application.DTOs.User.UserListItemDTO
-                {
-                    Id = x.Id,
-                    Username = x.Username,
-                    Email = x.Email,
-                    FullName = x.FullName,
-                    IsActive = x.IsActive,
-                    CreatedAt = x.CreatedAt
-                }).ToList();
+            return await query.Select(x => new UserListItemDTO
+            {
+                Id = x.Id,
+                Username = x.Username,
+                Email = x.Email,
+                FullName = x.FullName,
+                IsActive = x.IsActive,
+                CreatedAt = x.CreatedAt
+            }).ToListAsync();
         }
 
         public async Task<Domain.Entities.User?> GetByUsernameAsync(string username)
@@ -97,13 +87,14 @@ namespace Infrastructure.Repositories.User
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> TaoMoi(CreateUserDTO dto)
+        public async Task<bool> TaoMoi(CreateUserDTO dto, string hashedPassword, string salt)
         {
             var entity = new Domain.Entities.User
             {
                 Id = Guid.NewGuid(),
                 Username = dto.Username.Trim(),
-                PasswordHash = dto.Password, // TODO: Hash password
+                PasswordHash = hashedPassword,
+                PasswordSalt = salt,
                 Email = dto.Email,
                 FullName = dto.FullName,
                 RealmId = dto.RealmId,
@@ -112,7 +103,6 @@ namespace Infrastructure.Repositories.User
             };
 
             await _context.Users.AddAsync(entity);
-
             return await _context.SaveChangesAsync() > 0;
         }
     }
