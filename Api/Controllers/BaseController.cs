@@ -1,8 +1,5 @@
 using Application.DTOs.Common;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using static Domain.Constants.MessageConstant;
 
 namespace Api.Controllers
@@ -13,11 +10,12 @@ namespace Api.Controllers
         public List<string> Roles { get; set; } = new List<string>();
         public bool IsAdmin { get; set; }
 
-        protected async Task<BaseResponseDTO<T>> HandleException<T>(Task<BaseResponseDTO<T>> task)
+        protected async Task<BaseResponseDTO<T>> HandleException<T>(Task<T> task, MetaDataDTO? meta = null)
         {
             try
             {
-                return await task;
+                var data = await task;
+                return BaseResponseDTO<T>.SuccessResponse(data, meta);
             }
             catch (ApplicationException ex)
             {

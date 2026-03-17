@@ -1,4 +1,8 @@
+using Application.DTOs.Common;
+using Application.DTOs.User;
 using Application.IRepositories.User;
+using Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,16 +13,16 @@ namespace Infrastructure.Repositories.User
 {
     public class UserRepository : IUserRepository
     {
-        private readonly Infrastructure.Persistence.AppDbContext _context;
+        private readonly AppDbContext _context;
 
-        public UserRepository(Infrastructure.Persistence.AppDbContext context)
+        public UserRepository(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<List<Application.DTOs.User.UserListItemDTO>> Search(Application.DTOs.Common.QueryDTO<Application.DTOs.User.UserQueryDTO> model)
+        public async Task<List<UserListItemDTO>> Search(QueryDTO<UserQueryDTO> model)
         {
-            var query = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.AsNoTracking(_context.Users)
+            var query = EntityFrameworkQueryableExtensions.AsNoTracking(_context.Users)
                 .OrderByDescending(x => x.CreatedAt)
                 .AsQueryable();
 
@@ -44,7 +48,7 @@ namespace Infrastructure.Repositories.User
             }
 
             // 3. Tính tổng số bản ghi
-            model.Total = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.CountAsync(query);
+            model.Total = await EntityFrameworkQueryableExtensions.CountAsync(query);
 
             // 4. Phân trang
             if (!model.IsGetAll)
@@ -53,7 +57,7 @@ namespace Infrastructure.Repositories.User
             }
 
             // 5. Mapping trực tiếp sang DTO
-            return (await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(query))
+            return (await EntityFrameworkQueryableExtensions.ToListAsync(query))
                 .Select(x => new Application.DTOs.User.UserListItemDTO
                 {
                     Id = x.Id,

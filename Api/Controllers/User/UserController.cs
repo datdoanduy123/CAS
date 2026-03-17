@@ -1,7 +1,11 @@
+using Application.DTOs.Common;
+using Application.DTOs.User;
+using Microsoft.AspNetCore.Mvc;
+
 namespace Api.Controllers.User
 {
-    [Microsoft.AspNetCore.Mvc.ApiController]
-    [Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
+    [ApiController]
+    [Route("api/[controller]")]
     public class UserController : BaseController
     {
         private readonly Application.IServices.User.IUserService _userService;
@@ -11,10 +15,10 @@ namespace Api.Controllers.User
             _userService = userService;
         }
 
-        [Microsoft.AspNetCore.Mvc.HttpGet]
-        public async Task<Application.DTOs.Common.BaseResponseDTO<List<Application.DTOs.User.UserListItemDTO>>> GetAll([Microsoft.AspNetCore.Mvc.FromQuery] Application.DTOs.Common.BaseQueryDTO request, [Microsoft.AspNetCore.Mvc.FromQuery] Application.DTOs.User.UserQueryDTO filter)
+        [HttpGet]
+        public async Task<BaseResponseDTO<List<UserListItemDTO>>> GetAll([FromQuery] BaseQueryDTO request, [FromQuery] UserQueryDTO filter)
         {
-            var query = new Application.DTOs.Common.QueryDTO<Application.DTOs.User.UserQueryDTO>
+            var query = new QueryDTO<UserQueryDTO>    
             {
                 Keyword = request.Keyword,
                 Page = request.Page,
@@ -24,7 +28,14 @@ namespace Api.Controllers.User
                 IsAdmin = IsAdmin
             };
 
-            return await HandleException(_userService.GetAllAsync(query));
+            // Gọi service lấy data, Repo đã update query.Total
+            var dataTask = _userService.GetAllAsync(query);
+            await dataTask; 
+
+            // Sau khi Repo chạy xong, query.Total đã được cập nhật
+            var metaData = new MetaDataDTO { Page = query.Page, PageSize = query.PageSize, Total = query.Total };
+
+            return await HandleException(dataTask, metaData);
         }
     }
 }

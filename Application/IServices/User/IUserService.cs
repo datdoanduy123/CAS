@@ -1,3 +1,5 @@
+using Application.DTOs.Common;
+using Application.DTOs.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +10,6 @@ namespace Application.IServices.User
 {
     public interface IUserService
     {
-        Task<Application.DTOs.Common.BaseResponseDTO<List<Application.DTOs.User.UserListItemDTO>>> GetAllAsync(Application.DTOs.Common.QueryDTO<Application.DTOs.User.UserQueryDTO> model);
+        Task<List<UserListItemDTO>> GetAllAsync(QueryDTO<UserQueryDTO> model);
     }
 }
