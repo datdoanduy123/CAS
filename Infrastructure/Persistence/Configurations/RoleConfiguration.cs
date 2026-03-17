@@ -21,6 +21,10 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
         builder.Property(e => e.Description)
             .HasMaxLength(500);
 
+        builder.Property(e => e.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true);
+
         builder.HasOne(e => e.Realm)
             .WithMany(r => r.Roles)
             .HasForeignKey(e => e.RealmId)
