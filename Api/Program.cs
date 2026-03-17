@@ -21,6 +21,8 @@ builder.Services.AddScoped<Application.IRepositories.User.IUserRepository, Infra
 builder.Services.AddScoped<Application.IServices.User.IUserService, Application.Services.User.UserService>();
 builder.Services.AddScoped<Application.IRepositories.Role.IRoleRepository, Infrastructure.Repositories.Role.RoleRepository>();
 builder.Services.AddScoped<Application.IServices.Role.IRoleService, Application.Services.Role.RoleService>();
+builder.Services.AddScoped<Application.IRepositories.App.IAppRepository, Infrastructure.Repositories.App.AppRepository>();
+builder.Services.AddScoped<Application.IServices.App.IAppService, Application.Services.App.AppService>();
 
 var app = builder.Build();
 

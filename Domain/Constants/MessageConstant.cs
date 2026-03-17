@@ -19,5 +19,11 @@ namespace Domain.Constants
             public const string EMAIL_EXIST = "User_002";             // Email đã tồn tại
             public const string USER_NOT_FOUND = "User_404";          // Không tìm thấy người dùng
         }
+
+        public static class AppMessage
+        {
+            public const string APP_EXIST = "App_001";                // Ứng dụng đã tồn tại
+            public const string APP_NOT_FOUND = "App_404";            // Không tìm thấy ứng dụng
+        }
     }
 }
