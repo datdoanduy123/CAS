@@ -1,12 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Application.DTOs.Common;
+using Application.DTOs.User;
 using System.Threading.Tasks;
 
 namespace Application.IServices.User
 {
-    internal interface IUserService
+    public interface IUserService
     {
+        Task<BaseResponseDTO<CreateUserResponseDTO>> CreateUserAsync(CreateUserRequestDTO request);
     }
 }
