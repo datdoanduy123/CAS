@@ -12,9 +12,13 @@ builder.Services.AddDbContext<Infrastructure.Persistence.AppDbContext>(options =
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Dependency Injection
+builder.Services.AddScoped<Application.IRepositories.User.IUserRepository, Infrastructure.Repositories.User.UserRepository>();
+builder.Services.AddScoped<Application.IServices.User.IUserService, Application.Services.User.UserService>();
 
 var app = builder.Build();
 

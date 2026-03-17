@@ -13,12 +13,11 @@ namespace Api.Controllers
         public List<string> Roles { get; set; } = new List<string>();
         public bool IsAdmin { get; set; }
 
-        protected async Task<BaseResponseDTO<T>> HandleException<T>(Task<T> task)
+        protected async Task<BaseResponseDTO<T>> HandleException<T>(Task<BaseResponseDTO<T>> task)
         {
             try
             {
-                var data = await task;
-                return BaseResponseDTO<T>.SuccessResponse(data);
+                return await task;
             }
             catch (ApplicationException ex)
             {

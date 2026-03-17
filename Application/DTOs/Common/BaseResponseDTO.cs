@@ -4,32 +4,16 @@ namespace Application.DTOs.Common
 {
     public class BaseResponseDTO<T>
     {
-        public bool IsSuccess { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public int StatusCode { get; set; }
+        public int Code { get; set; } = 0;
+        public bool Success { get; set; } = true;
+        public string? Message { get; set; }
         public T? Data { get; set; }
-        public List<string>? Errors { get; set; }
+        public MetaDataDTO? MetaData { get; set; }
 
-        public static BaseResponseDTO<T> SuccessResponse(T data, string message = "SUCCESS", int statusCode = 200)
-        {
-            return new BaseResponseDTO<T>
-            {
-                IsSuccess = true,
-                Message = message,
-                StatusCode = statusCode,
-                Data = data
-            };
-        }
+        public static BaseResponseDTO<T> SuccessResponse(T data, MetaDataDTO? meta = null, string? message = null, int code = 200)
+            => new() { Data = data, MetaData = meta, Message = message, Code = code, Success = true };
 
-        public static BaseResponseDTO<T> FailResponse(string message, int statusCode = 400, List<string>? errors = null)
-        {
-            return new BaseResponseDTO<T>
-            {
-                IsSuccess = false,
-                Message = message,
-                StatusCode = statusCode,
-                Errors = errors
-            };
-        }
+        public static BaseResponseDTO<T> FailResponse(string message, int code = 500)
+            => new() { Message = message, Code = code, Success = false };
     }
 }

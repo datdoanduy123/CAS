@@ -8,5 +8,6 @@ namespace Application.IRepositories.User
 {
     public interface IUserRepository
     {
+        Task<List<Application.DTOs.User.UserListItemDTO>> Search(Application.DTOs.Common.QueryDTO<Application.DTOs.User.UserQueryDTO> model);
     }
 }
