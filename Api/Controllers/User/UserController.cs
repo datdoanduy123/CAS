@@ -15,6 +15,36 @@ namespace Api.Controllers.User
             _userService = userService;
         }
 
+        [HttpPost]
+        public async Task<BaseResponseDTO<bool>> Create([FromBody] CreateUserDTO request)
+        {
+            return await HandleException(_userService.CreateAsync(request));
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<BaseResponseDTO<bool>> Delete([FromRoute] Guid id)
+        {
+            return await HandleException(_userService.DeleteAsync(id));
+        }
+
+        [HttpDelete("soft-delete/{id}")]
+        public async Task<BaseResponseDTO<bool>> SoftDelete([FromRoute] Guid id)
+        {
+            return await HandleException(_userService.SoftDeleteAsync(id));
+        }
+
+        [HttpPut("{id}")]
+        public async Task<BaseResponseDTO<bool>> Update([FromRoute] Guid id, [FromBody] UpdateUserDTO request)
+        {
+            return await HandleException(_userService.UpdateAsync(id, request));
+        }
+
+        [HttpGet("{id}")]
+        public async Task<BaseResponseDTO<UserListItemDTO?>> GetById([FromRoute] Guid id)
+        {
+            return await HandleException(_userService.GetByIdAsync(id));
+        }
+
         [HttpGet]
         public async Task<BaseResponseDTO<List<UserListItemDTO>>> GetAll([FromQuery] BaseQueryDTO request, [FromQuery] UserQueryDTO filter)
         {
