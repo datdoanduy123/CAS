@@ -23,6 +23,7 @@ namespace Infrastructure.Repositories.User
         public async Task<List<UserListItemDTO>> Search(QueryDTO<UserQueryDTO> model)
         {
             var query = EntityFrameworkQueryableExtensions.AsNoTracking(_context.Users)
+                .Where(x => x.IsActive) // Mặc định chỉ lấy những người đang hoạt động
                 .OrderByDescending(x => x.CreatedAt)
                 .AsQueryable();
 
@@ -67,6 +68,52 @@ namespace Infrastructure.Repositories.User
                     IsActive = x.IsActive,
                     CreatedAt = x.CreatedAt
                 }).ToList();
+        }
+
+        public async Task<Domain.Entities.User?> GetByUsernameAsync(string username)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        public async Task<Domain.Entities.User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<Domain.Entities.User?> GetByIdAsync(Guid id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        public async Task<bool> CapNhat(Domain.Entities.User user)
+        {
+            _context.Users.Update(user);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> XoaCung(Domain.Entities.User user)
+        {
+            _context.Users.Remove(user);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> TaoMoi(CreateUserDTO dto)
+        {
+            var entity = new Domain.Entities.User
+            {
+                Id = Guid.NewGuid(),
+                Username = dto.Username.Trim(),
+                PasswordHash = dto.Password, // TODO: Hash password
+                Email = dto.Email,
+                FullName = dto.FullName,
+                RealmId = dto.RealmId,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+            };
+
+            await _context.Users.AddAsync(entity);
+
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

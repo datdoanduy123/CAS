@@ -1,4 +1,4 @@
-﻿namespace Domain.Constants
+namespace Domain.Constants
 {
     public static class MessageConstant
     {
@@ -11,6 +11,13 @@
             public const string MISSING_PARAM = "Common_501";             // 501 - Thiếu tham số
             public const string SUCCESS = "SUCCESS";
             public const string FAILED = "FAILED";
+        }
+
+        public static class UserMessage
+        {
+            public const string USER_EXIST = "User_001";              // Tên đăng nhập đã tồn tại
+            public const string EMAIL_EXIST = "User_002";             // Email đã tồn tại
+            public const string USER_NOT_FOUND = "User_404";          // Không tìm thấy người dùng
         }
     }
 }
