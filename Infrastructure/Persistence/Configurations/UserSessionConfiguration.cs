@@ -10,11 +10,9 @@ public class UserSessionConfiguration : IEntityTypeConfiguration<UserSession>
     {
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.IpAddress)
-            .HasMaxLength(50);
+        builder.Property(e => e.IpAddress).HasMaxLength(50);
 
-        builder.Property(e => e.UserAgent)
-            .HasMaxLength(500);
+        builder.Property(e => e.UserAgent).HasMaxLength(500);
 
         builder.HasOne(e => e.User)
             .WithMany(u => u.UserSessions)

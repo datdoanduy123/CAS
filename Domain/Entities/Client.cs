@@ -10,6 +10,8 @@ namespace Domain.Entities
     {
         public string Name { get; set; } = string.Empty;
         
+        public string Code { get; set; } = string.Empty;    
+        
         /// <summary>
         /// Mật khẩu của ứng dụng (dùng cho luồng bảo mật cao)
         /// </summary>
