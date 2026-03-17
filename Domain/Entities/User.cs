@@ -23,6 +23,12 @@ public class User : BaseEntity
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? LastLoginAt { get; set; }
 
+    public string? ResetPasswordOtp { get; set; }
+    public DateTime? ResetPasswordOtpExpiry { get; set; }
+    
+    public string? ResetPasswordToken { get; set; }
+    public DateTime? ResetPasswordTokenExpiry { get; set; }
+
     // SSO Navigation Properties
     public Guid? RealmId { get; set; }
     public Realm? Realm { get; set; }

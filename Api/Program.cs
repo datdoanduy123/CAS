@@ -44,6 +44,7 @@ builder.Services.AddScoped<IAppRepository, AppRepository>();
 builder.Services.AddScoped<IAppService, AppService>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<Application.IServices.IEmailService, Infrastructure.Services.EmailService>();
 // Role Assignment Repository (gán/gỡ quyền cho User)
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 

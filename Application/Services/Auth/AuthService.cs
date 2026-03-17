@@ -2,6 +2,7 @@ using Application.DTOs.Auth;
 using Application.DTOs.Common;
 using Application.IRepositories.Auth;
 using Application.IRepositories.User;
+using Application.IServices;
 using Application.IServices.Auth;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
@@ -20,12 +21,14 @@ namespace Application.Services.Auth
         private readonly IAuthRepository _authRepository;
         private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
-        public AuthService(IAuthRepository authRepository, IUserRepository userRepository, IConfiguration configuration)
+        public AuthService(IAuthRepository authRepository, IUserRepository userRepository, IConfiguration configuration, IEmailService emailService)
         {
             _authRepository = authRepository;
             _userRepository = userRepository;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         public async Task<BaseResponseDTO<LoginResponseDTO>> LoginAsync(LoginRequestDTO request, string appCode, string? ipAddress, string? userAgent)
@@ -317,6 +320,106 @@ namespace Application.Services.Auth
             {
                 Success = true,
                 Message = "Đổi mật khẩu thành công.",
+                Data = "OK"
+            };
+        }
+
+        public async Task<BaseResponseDTO<string>> ForgotPasswordAsync(ForgotPasswordRequestDTO request)
+        {
+            var user = await _userRepository.GetByEmailAsync(request.Email);
+            if (user == null || !user.IsActive)
+            {
+                return new BaseResponseDTO<string>
+                {
+                    Success = false,
+                    Message = "Email này không tồn tại trong hệ thống hoặc tài khoản đã bị vô hiệu hóa.",
+                    Data = null
+                };
+            }
+
+            // Generate 6 digit OTP
+            var rand = new Random();
+            string otp = rand.Next(100000, 999999).ToString();
+
+            user.ResetPasswordOtp = otp;
+            user.ResetPasswordOtpExpiry = DateTime.UtcNow.AddMinutes(5);
+
+            await _authRepository.UpdateUserPasswordAsync(user);
+
+            // Mock sending email
+            string message = $"Mã OTP của bạn là: {otp}. Mã có hiệu lực trong 5 phút.";
+            await _emailService.SendEmailAsync(user.Email, "Reset Password OTP", message);
+
+            return new BaseResponseDTO<string>
+            {
+                Success = true,
+                Message = "Nếu email hợp lệ, bạn sẽ nhận được OTP để đặt lại mật khẩu.",
+                Data = "Mã OTP đã được gửi."
+            };
+        }
+
+        public async Task<BaseResponseDTO<string>> VerifyOtpAsync(VerifyOtpRequestDTO request)
+        {
+            var user = await _userRepository.GetByEmailAsync(request.Email);
+            if (user == null || !user.IsActive)
+            {
+                return new BaseResponseDTO<string> { Success = false, Message = "Thông tin không chính xác." };
+            }
+
+            if (user.ResetPasswordOtp != request.Otp || user.ResetPasswordOtpExpiry < DateTime.UtcNow)
+            {
+                return new BaseResponseDTO<string> { Success = false, Message = "OTP không hợp lệ hoặc đã hết hạn." };
+            }
+
+            // Generate Reset Token
+            string resetToken = Guid.NewGuid().ToString("N");
+            user.ResetPasswordToken = resetToken;
+            user.ResetPasswordTokenExpiry = DateTime.UtcNow.AddMinutes(15);
+            
+            // Clear OTP
+            user.ResetPasswordOtp = null;
+            user.ResetPasswordOtpExpiry = null;
+
+            await _authRepository.UpdateUserPasswordAsync(user);
+
+            return new BaseResponseDTO<string>
+            {
+                Success = true,
+                Message = "Xác thực OTP thành công.",
+                Data = resetToken
+            };
+        }
+
+        public async Task<BaseResponseDTO<string>> ResetPasswordAsync(ResetPasswordRequestDTO request)
+        {
+            var user = await _userRepository.GetByEmailAsync(request.Email);
+            if (user == null || !user.IsActive)
+            {
+                return new BaseResponseDTO<string> { Success = false, Message = "Thông tin không chính xác." };
+            }
+
+            if (user.ResetPasswordToken != request.ResetToken || user.ResetPasswordTokenExpiry < DateTime.UtcNow)
+            {
+                return new BaseResponseDTO<string> { Success = false, Message = "Phiên đổi mật khẩu đã hết hạn hoặc không hợp lệ." };
+            }
+
+            // Hash new password
+            string salt = BCrypt.Net.BCrypt.GenerateSalt();
+            string newPasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword, salt);
+
+            user.PasswordHash = newPasswordHash;
+            user.PasswordSalt = salt;
+            
+            // Clear Reset Token
+            user.ResetPasswordToken = null;
+            user.ResetPasswordTokenExpiry = null;
+
+            await _authRepository.UpdateUserPasswordAsync(user);
+
+            return new BaseResponseDTO<string>
+            {
+                Success = true,
+                Message = "Đặt lại mật khẩu thành công.",
                 Data = "OK"
             };
         }

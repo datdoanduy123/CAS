@@ -83,5 +83,23 @@ namespace Api.Controllers.Auth
 
             return await _authService.ChangePasswordAsync(userId, request);
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<BaseResponseDTO<string>> ForgotPassword([FromBody] ForgotPasswordRequestDTO request)
+        {
+            return await _authService.ForgotPasswordAsync(request);
+        }
+
+        [HttpPost("verify-otp")]
+        public async Task<BaseResponseDTO<string>> VerifyOtp([FromBody] VerifyOtpRequestDTO request)
+        {
+            return await _authService.VerifyOtpAsync(request);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<BaseResponseDTO<string>> ResetPassword([FromBody] ResetPasswordRequestDTO request)
+        {
+            return await _authService.ResetPasswordAsync(request);
+        }
     }
 }
