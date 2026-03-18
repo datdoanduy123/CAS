@@ -4,6 +4,7 @@ using Application.IRepositories.Auth;
 using Application.IRepositories.User;
 using Application.IServices;
 using Application.IServices.Auth;
+using Application.Helpers;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -61,7 +62,7 @@ namespace Application.Services.Auth
             }
 
             // 3. Verify Password
-            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+            bool isPasswordValid = SecurityHelper.VerifyPassword(request.Password, user.PasswordHash, user.PasswordSalt);
             if (!isPasswordValid)
             {
                 return new BaseResponseDTO<LoginResponseDTO>
@@ -203,11 +204,11 @@ namespace Application.Services.Auth
             if (user == null || !user.IsActive)
                 return Fail<string>("Tài khoản không tồn tại hoặc đã bị khóa.");
 
-            if (!BCrypt.Net.BCrypt.Verify(request.OldPassword, user.PasswordHash))
+            if (!SecurityHelper.VerifyPassword(request.OldPassword, user.PasswordHash, user.PasswordSalt))
                 return Fail<string>("Mật khẩu hiện tại không chính xác.");
 
-            string salt = BCrypt.Net.BCrypt.GenerateSalt();
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword, salt);
+            string salt = SecurityHelper.GenerateSalt();
+            user.PasswordHash = SecurityHelper.HashPassword(request.NewPassword, salt);
             user.PasswordSalt = salt;
 
             await _authRepository.UpdateUserPasswordAsync(user);
@@ -261,8 +262,8 @@ namespace Application.Services.Auth
             if (user.ResetPasswordToken != request.ResetToken || user.ResetPasswordTokenExpiry < DateTime.UtcNow)
                 return Fail<string>("Phiên đổi mật khẩu đã hết hạn hoặc không hợp lệ.");
 
-            string salt = BCrypt.Net.BCrypt.GenerateSalt();
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword, salt);
+            string salt = SecurityHelper.GenerateSalt();
+            user.PasswordHash = SecurityHelper.HashPassword(request.NewPassword, salt);
             user.PasswordSalt = salt;
             user.ResetPasswordToken = null;
             user.ResetPasswordTokenExpiry = null;
@@ -296,7 +297,7 @@ namespace Application.Services.Auth
             if (user == null || !user.IsActive)
                 return Fail<SsoAuthorizeResponseDTO>("Tài khoản hoặc mật khẩu không chính xác.");
 
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            if (!SecurityHelper.VerifyPassword(request.Password, user.PasswordHash, user.PasswordSalt))
                 return Fail<SsoAuthorizeResponseDTO>("Tài khoản hoặc mật khẩu không chính xác.");
 
             await _authRepository.UpdateUserLastLoginAsync(user);
