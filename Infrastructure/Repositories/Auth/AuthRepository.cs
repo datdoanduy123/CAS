@@ -114,5 +114,11 @@ namespace Infrastructure.Repositories.Auth
             await _context.AppSessions.AddAsync(appSession);
             await _context.SaveChangesAsync();
         }
+
+        public async Task UpdateUserSessionAsync(UserSession userSession)
+        {
+            _context.UserSessions.Update(userSession);
+            await _context.SaveChangesAsync();
+        }
     }
 }

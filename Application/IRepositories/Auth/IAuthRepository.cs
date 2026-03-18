@@ -21,5 +21,6 @@ namespace Application.IRepositories.Auth
         Task<UserSession?> GetActiveUserSessionAsync(Guid userSessionId);
         Task<Domain.Entities.User?> GetUserWithRolesAsync(Guid userId);
         Task SaveAppSessionAsync(AppSession appSession);
+        Task UpdateUserSessionAsync(UserSession userSession);
     }
 }

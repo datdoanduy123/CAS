@@ -385,6 +385,10 @@ namespace Application.Services.Auth
 
             var now = DateTime.UtcNow;
 
+            // 4. Update existing UserSession to keep it alive
+            userSession.LastAccessedAt = now;
+            await _authRepository.UpdateUserSessionAsync(userSession);
+
             // 5. Create AppSession for the target App under the existing UserSession
             var appSession = new AppSession
             {
@@ -415,7 +419,9 @@ namespace Application.Services.Auth
 
             await _authRepository.SaveAuthorizationCodeAsync(authorizationCode);
 
-            var redirectUrl = $"{redirectUri.TrimEnd('/')}?code={authCode}";
+            // Construct redirect URL, handling existing query parameters if any
+            var separator = redirectUri.Contains("?") ? "&" : "?";
+            var redirectUrl = $"{redirectUri}{separator}code={authCode}";
             return new BaseResponseDTO<SsoAuthorizeResponseDTO>
             {
                 Success = true,
