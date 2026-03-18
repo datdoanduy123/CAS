@@ -21,7 +21,7 @@ namespace Domain.Entities
         // Thời gian sống của Code rất ngắn (VD: 1-5 phút)
         public DateTime ExpiresAt { get; set; }
         public bool IsUsed { get; set; } = false;
-        
+
         public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
     }
 }

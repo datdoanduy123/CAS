@@ -62,5 +62,57 @@ namespace Infrastructure.Repositories.Auth
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
         }
+
+        // ── SSO Authorization Code Flow ────────────────────────────────────────
+
+        public async Task SaveAuthorizationCodeAsync(AuthorizationCode authCode)
+        {
+            await _context.AuthorizationCodes.AddAsync(authCode);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<AuthorizationCode?> GetAuthorizationCodeAsync(string code)
+        {
+            return await _context.AuthorizationCodes
+                .Include(c => c.User)
+                    .ThenInclude(u => u!.UserRoles!)
+                        .ThenInclude(ur => ur.Role)
+                .Include(c => c.App)
+                .FirstOrDefaultAsync(c => c.Code == code);
+        }
+
+        public async Task UpdateAuthorizationCodeAsync(AuthorizationCode authCode)
+        {
+            _context.AuthorizationCodes.Update(authCode);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<UserSession?> GetActiveUserSessionAsync(Guid userSessionId)
+        {
+            var now = DateTime.UtcNow;
+            return await _context.UserSessions
+                .Include(s => s.User)
+                    .ThenInclude(u => u!.UserRoles!)
+                        .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(s =>
+                    s.Id == userSessionId &&
+                    s.IsActive &&
+                    s.ExpiresAt != null &&
+                    s.ExpiresAt > now);
+        }
+
+        public async Task<Domain.Entities.User?> GetUserWithRolesAsync(Guid userId)
+        {
+            return await _context.Users
+                .Include(u => u.UserRoles!)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Id == userId && u.IsActive);
+        }
+
+        public async Task SaveAppSessionAsync(AppSession appSession)
+        {
+            await _context.AppSessions.AddAsync(appSession);
+            await _context.SaveChangesAsync();
+        }
     }
 }

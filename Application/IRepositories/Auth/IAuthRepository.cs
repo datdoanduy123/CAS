@@ -1,4 +1,5 @@
 using Domain.Entities;
+using System;
 using System.Threading.Tasks;
 
 namespace Application.IRepositories.Auth
@@ -12,5 +13,13 @@ namespace Application.IRepositories.Auth
         Task UpdateRefreshTokenAsync(RefreshToken refreshToken);
         Task UpdateUserLastLoginAsync(Domain.Entities.User user);
         Task UpdateUserPasswordAsync(Domain.Entities.User user);
+
+        // SSO Authorization Code Flow
+        Task SaveAuthorizationCodeAsync(AuthorizationCode authCode);
+        Task<AuthorizationCode?> GetAuthorizationCodeAsync(string code);
+        Task UpdateAuthorizationCodeAsync(AuthorizationCode authCode);
+        Task<UserSession?> GetActiveUserSessionAsync(Guid userSessionId);
+        Task<Domain.Entities.User?> GetUserWithRolesAsync(Guid userId);
+        Task SaveAppSessionAsync(AppSession appSession);
     }
 }
