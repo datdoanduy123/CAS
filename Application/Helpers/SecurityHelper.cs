@@ -41,6 +41,15 @@ namespace Application.Helpers
         }
 
         /// <summary>
+        /// Xác thực mật khẩu PBKDF2
+        /// </summary>
+        public static bool VerifyPassword(string password, string hashedPassword, string salt)
+        {
+            var newHash = HashPassword(password, salt);
+            return newHash == hashedPassword;
+        }
+
+        /// <summary>
         /// Sinh Secret ngẫu nhiên bảo mật (Dùng cho AppSecret)
         /// </summary>
         public static string GenerateRandomSecret(int length = 32)
